@@ -1,5 +1,6 @@
 #Asad Asad 201810523  
 #Kholoud Thabet 201810602
+#Rakan Al Badarneh 201810890
 
 
 read.csv("udemy_output_All_Finance__Accounting_p1_p626.csv")

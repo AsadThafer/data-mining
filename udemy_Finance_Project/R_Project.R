@@ -20,7 +20,7 @@ which(is.na(std)) #identify the location of NA
 
 unique(std['discount_price__currency']) #discount_price__currency unique values (NA,INR)
 
-unique(std['price_detail__currency']) #price_detail__currency unique values 
+unique(std['price_detail__currency']) #price_detail__currency unique values  (NA,INR)
 
 cols <- std[,c('discount_price__amount','discount_price__price_string', 'price_detail__amount', 'price_detail__price_string')]
 
@@ -28,8 +28,8 @@ head(cols,20) # display cols,we can find that these cols almost matches
 
 droppedcols <- std[,c('discount_price__currency','discount_price__price_string','price_detail__currency', 'price_detail__price_string')]
 
-#we will drop those useless columns : 'discount_price__currency','discount_price__price_string'
-# 'price_detail__currency', 'price_detail__price_string'
+#we will drop those useless columns : 
+#'discount_price__currency','discount_price__price_string' 'price_detail__currency', 'price_detail__price_string'
 
 
 
@@ -44,7 +44,7 @@ std[,c('url','avg_rating','avg_rating_recent', 'rating')]
 # we can find that avg_rating_recent = rating , so we will drop one of them
 # also the url column is useless for our data mining
 
-std[,c('url','rating')]<- list(NULL)
+std[,c('url','avg_rating_recent')]<- list(NULL)
 #dropped the columns
 
 head(std,3) #display 3 values to check our latest version of dataset
@@ -75,7 +75,7 @@ std$'price_detail__amount'[is.na(std[['price_detail__amount']])] <- 0 # we fille
 
 # we need to remove the columns which matches the following condition : it's paid and also at 0 price
 
-paidwithprice <- which(std$'is_paid'==TRUE & std$'price_detail__amount'== 0) # we found the specific entry number
+freebutwithprice <- which(std$'is_paid'==TRUE & std$'price_detail__amount'== 0) # we found the specific entry number
 
 std = std[-c(13608),] # we dropped it by index (1 entry)
 
@@ -102,91 +102,136 @@ timenow <- now()
 std$created <- ymd_hms(std$created)      # to make sure all on same format
 std$published_time <- ymd_hms(std$published_time)   # to make sure all on same format
 
+stdcor <-std
 
 #...................... Done Dealing with Date & Time ......................#
+install.packages("e1071")
+install.packages("caret")
+library("e1071")
+library("caret")
+library('dplyr')
+stdt <- std
+stdt[,c('id','title','created','published_time')]<- list(NULL)
+
+#avg_rating is copy of rating after categorizing
+
+#rating into 4 categories
+stdt$rating[stdt$rating<=2] <- 0
+stdt$rating[stdt$rating<=3 & stdt$rating>2] <- 1
+stdt$rating[stdt$rating>3 & stdt$rating<4] <- 2
+stdt$rating[stdt$rating>=4] <- 3
+
+stdt$rating[stdt$rating==0] <- 'Unacceptable'
+stdt$rating[stdt$rating==1] <- 'Weak'
+stdt$rating[stdt$rating==2] <- 'Good'
+stdt$rating[stdt$rating==3] <- 'Excellent'
+
+#
+
+#avg_rating into 4 categories
+stdt$avg_rating[stdt$avg_rating<=2] <- 0
+stdt$avg_rating[stdt$avg_rating<=3 & stdt$avg_rating>2] <- 1
+stdt$avg_rating[stdt$avg_rating>3 & stdt$avg_rating<4] <- 2
+stdt$avg_rating[stdt$avg_rating>=4] <- 3
+
+stdt$avg_rating[stdt$avg_rating==0] <- 'Unacceptable'
+stdt$avg_rating[stdt$avg_rating==1] <- 'Weak'
+stdt$avg_rating[stdt$avg_rating==2] <- 'Good'
+stdt$avg_rating[stdt$avg_rating==3] <- 'Excellent'
+
+#
+
+
+#num_published_lectures into 3 categories
+quantile(std$num_published_lectures)
+
+stdt$num_published_lectures[stdt$num_published_lectures<=12] <- 0
+stdt$num_published_lectures[stdt$num_published_lectures<37 & stdt$num_published_lectures>12] <- 1
+stdt$num_published_lectures[stdt$num_published_lectures>=37] <- 2
+
+stdt$num_published_lectures[stdt$num_published_lectures==0] <- 'low'
+stdt$num_published_lectures[stdt$num_published_lectures==1] <- 'medium'
+stdt$num_published_lectures[stdt$num_published_lectures==2] <- 'high'
+#
+
+#num_published_practice_tests into 2 categories
+quantile(std$num_published_practice_tests)
+
+stdt$num_published_practice_tests[stdt$num_published_practice_tests==0] <- 0
+stdt$num_published_practice_tests[stdt$num_published_practice_tests>1] <- 1
+
+
+stdt$num_published_practice_tests[stdt$num_published_practice_tests==0] <- 'None'
+stdt$num_published_practice_tests[stdt$num_published_practice_tests==1] <- 'Has'
+#
+
+#discount_price__amount into 3 categories
+quantile(std$discount_price__amount)
+
+stdt$discount_price__amount[stdt$discount_price__amount==0] <- 0
+stdt$discount_price__amount[stdt$discount_price__amount<=450 & stdt$discount_price__amount>0] <- 1
+stdt$discount_price__amount[stdt$discount_price__amount>450] <- 2
+
+
+stdt$discount_price__amount[stdt$discount_price__amount==0] <- 'None'
+stdt$discount_price__amount[stdt$discount_price__amount==1] <- 'Small'
+stdt$discount_price__amount[stdt$discount_price__amount==2] <- 'High'
+#
+
+#price_detail__amount into 3 categories
+quantile(std$price_detail__amount)
+
+stdt$price_detail__amount[stdt$price_detail__amount<=1280] <- 0
+stdt$price_detail__amount[stdt$price_detail__amount<=8640 & stdt$price_detail__amount>1280] <- 1
+stdt$price_detail__amount[stdt$price_detail__amount>8640] <- 2
+
+
+stdt$price_detail__amount[stdt$price_detail__amount==0] <- 'Cheap'
+stdt$price_detail__amount[stdt$price_detail__amount==1] <- 'Acceptable'
+stdt$price_detail__amount[stdt$price_detail__amount==2] <- 'Expensive'
+#
+
+#num_reviews into 3 categories
+quantile(std$num_reviews)
+
+stdt$num_reviews[stdt$num_reviews<=7] <- 0
+stdt$num_reviews[stdt$num_reviews<2000 & stdt$num_reviews>7] <- 1
+stdt$num_reviews[stdt$num_reviews>=2000] <- 2
+
+stdt$num_reviews[stdt$num_reviews==0] <- 'low'
+stdt$num_reviews[stdt$num_reviews==1] <- 'medium'
+stdt$num_reviews[stdt$num_reviews==2] <- 'high'
+
+#
+
+#num_subscribers into 3 categories 
+quantile(std$num_subscribers) 
+
+stdt$num_subscribers[stdt$num_subscribers<=62] <- 0
+stdt$num_subscribers[stdt$num_subscribers >62 & stdt$num_subscribers<2280] <- 1
+stdt$num_subscribers[stdt$num_subscribers>=2280 ] <- 2
+
+stdt$num_subscribers[stdt$num_subscribers==0] <- 'low'
+stdt$num_subscribers[stdt$num_subscribers==1] <- 'medium'
+stdt$num_subscribers[stdt$num_subscribers==2] <- 'high'
+#
 
 
 
-#...................... Association Rules ..............................#
 
-install.packages('arules')
-library('arules')
+stdt
 
-summary(std) #very useful command that gives us informations about our dataset
+stdt$is_paid <-as.factor(stdt$is_paid)
 
 
-#...........
-install.packages("RColorBrewer")   # for plotting
-install.packages("tidyverse") #collection of R packages 
-library(tibble) 
-library(RColorBrewer)
-tibble(std)
-library("knitr") #give users full control of the output without heavy coding work.
+TrainIndex <- createDataPartition(stdt$is_paid,p=.6,list=FALSE)
+TrainData <-stdt[TrainIndex,]
+TestData <-stdt[-TrainIndex,]
 
-# install association rules Visualization package
-install.packages("arulesViz")
-library('arulesViz')  # for plotting
-
-std2 <- std[,c(2:13)] # remove the id from the dataset
-
-cor(std$avg_rating, std2$avg_rating_recent) 
-#we found correlation for avg_rating and avg_rating_recent = 98.9%
-#we will remove one of them (avg_rating_recent)
-std2[,c('avg_rating_recent')]<- list(NULL)
-
-#L1
-itemsets<-apriori(std2,parameter=list(minlen=1,maxlen=1,support=0.2,target="frequent itemsets"))
-
-
-summary(itemsets) 
-inspect(head(sort(itemsets,by="support"),30))
-
-# Second, get itemsets of length 2 #L2
-itemsets<-apriori(std2,parameter=list(minlen=2,maxlen=2,support=0.2,target="frequent itemsets"))
-
-summary(itemsets)                     
-inspect(head(sort(itemsets,by="support"),50))
-
-# Third, get itemsets of length 3 #L3
-itemsets<-apriori(std2,parameter=list(minlen=3,maxlen=3,support=0.2,target="frequent itemsets"))
-summary(itemsets)                              
-inspect(head(sort(itemsets,by="support"),55))
-
-# Fourth, get itemsets of length 4 #L4
-itemsets<-apriori(std2,parameter=list(minlen=4,maxlen=4,support=0.2,target="frequent itemsets"))
-summary(itemsets)                              
-inspect(head(sort(itemsets,by="support"),20))
-
-# get all rules according to supp. and conf.
-rules <- apriori(std2,parameter=list(support=0.2,confidence=0.6,target="rules"))
-
-summary(rules)  
-
-plot(rules,jitter = 0)               # displays scatterplot
-
-slope<-sort(round(rules@quality$lift/rules@quality$confidence,2))
-
-inspect(head(sort(rules,by="lift"),10))
-
-AssociationRules<-rules[quality(rules)$confidence>0.6] 
-AssociationRules
-inspect(AssociationRules[1:50])
-
-summary(AssociationRules)  
-plot(AssociationRules,method="matrix",measure=c("lift","confidence"),control=list(reorder="none"))
-
-highLiftRules<-head(sort(rules,by="lift"),5) 
-plot(highLiftRules,method="graph",control=list(type="items"))
-plot(rules, method="paracoord")
-
-inspect(rules[1:10])
-
-#{} => {discount_price__amount=[455,3.2e+03]}  will be created. These rules mean that no matter what other items are involved the item 
-#in the RHS will appear with the probability given by the rule's confidence (which equals the support)
-#...........
-
-write.csv(std2,"lastedit.csv", row.names = FALSE)   # final csv
-write(rules, file="RulesList.txt")                 #all rules as a txt file
+m <-naiveBayes(is_paid~.,data=TrainData,laplace=1)
+predict(m,TrainData)
+table(predict(m,TrainData),TrainData$is_paid)
+table(predict(m,TestData),TestData$is_paid)
 
 
 
@@ -195,19 +240,22 @@ install.packages("Hmisc")
 library("Hmisc")
 install.packages("corrplot")
 library(corrplot)
+
+stdcor        #got the latest version of std after cleaning
+
+
 #remove all non-numeric values
-stdcor <- std[,c(2:13)]
 stdcor[,c('id','title','is_paid','created','published_time')]<- list(NULL)
-res <- cor(stdcor)
-round(res, 2)
-corrplot(res)
 
+corr_result <- cor(stdcor)
+corr_result
+corrplot(corr_result)
 
-#To extract the values from this object into a useable data structure 
 #correlation can be between -1 and 1
-stdcor.rcorr = rcorr(as.matrix(stdcor))
-stdcor.rcorr
-stdcor.coeff = stdcor.rcorr$r #contains 1
-stdcor.p = stdcor.rcorr$P #contains NA
+
+
 
 #..................................................................#
+
+write.csv(stdt,"lasteversion.csv", row.names = FALSE)   # final csv written
+

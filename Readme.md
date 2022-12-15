@@ -7,12 +7,12 @@ Finance & Accounting Courses - Udemy (13K+ course).
 this Task is a part of my VHDL Course at <a href="https://ptuk.edu.ps/en/">Palestine Technical University - Karoorie</a>
 
 
-##Task 
+## Task 
 -cleaned Data 
 -dealt with missing values
 -categorized the data ,classifcation
 
-##Requirements file
+## Requirements file
 udemy Meta.txt
 
 

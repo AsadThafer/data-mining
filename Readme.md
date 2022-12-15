@@ -8,9 +8,9 @@ this Task is a part of my VHDL Course at <a href="https://ptuk.edu.ps/en/">Pales
 
 
 ## Task 
--cleaned Data 
--dealt with missing values
--categorized the data ,classifcation
+- cleaned Data 
+- dealt with missing values
+- categorized the data ,classifcation
 
 ## Requirements file
 udemy Meta.txt

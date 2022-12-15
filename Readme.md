@@ -1,12 +1,32 @@
-R implementation for udemy_finance_dataset
-((cleaned Data ,dealt with missing values, categorized the data and did classifcation))
+# Udemy Finance Dataset R implementation
 
-on the popular dataset :
-Finance & Accounting Courses - Udemy (13K+ course)
+This repository contains the R implementation for the popular dataset :
 
-Context
-A compilation of all the development related courses ( 13 thousand courses) which are available on Udemy's website. Under the development category, there are courses from Finance, Accounting, Book Keeping, Compliance, Cryptocurrence, Blockchain, Economics, Investing & Trading, Taxes and much more each having multiple courses under it's domain.
-All the details can be found on Udemy's website as well!
+Finance & Accounting Courses - Udemy (13K+ course).
 
-Content
-is explained the -udemy Meta.txt- file
+this Task is a part of my VHDL Course at <a href="https://ptuk.edu.ps/en/">Palestine Technical University - Karoorie</a>
+
+
+##Task 
+-cleaned Data 
+-dealt with missing values
+-categorized the data ,classifcation
+
+##Requirements file
+udemy Meta.txt
+
+
+This R implementation of the dataset includes data cleaning, data visualization, and classifcation. Data cleaning involves removing outliers, formatting data, and handling missing values. Data visualization involves creating charts and graphs to understand the data better.
+
+This repository contains the code for the R implementation, as well as the data files in CSV format. The code is written in R and is fully commented for better understanding.
+
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+If you have any questions regarding the code or data, please contact me.
+
+Thank you for your interest in my R implementation.
